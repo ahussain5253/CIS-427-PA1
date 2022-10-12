@@ -5,7 +5,7 @@ from venv import create
 
 
 # create a socket at SERVER side
-s=socket.socket()
+s=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 print('Socket Created')
 
 PORT = 7563 #this is my ID
@@ -21,35 +21,28 @@ print("Socket is Listening")
 conn = sqlite3.connect('cis427_crypto.sqlite')
 c = conn.cursor()
 
-c.execute("""CREATE TABLE IF NOT EXISTS
-                users(
-                ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                email TEXT NOT NULL,
-                first_name TEXT,
-                last_name TEXT,
-                user_name TEXT NOT NULL,
-                password TEXT,
-                usd_balance DOUBLE NOT NULL
-                );""")
+c.execute("""CREATE TABLE IF NOT EXISTS Users
+                        (
+                        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                        first_name varchar(255), 
+                        last_name varchar(255), 
+                        user_name varchar(255) NOT NULL, 
+                        password varchar(255),
+                        usd_balance DOUBLE NOT NULL
+                        );""")
 
-c.execute("""CREATE TABLE IF NOT EXISTS
-                cryptos(
-                ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                crypto_name varchar(10) NOT NULL,
-                crypto_balance DOUBLE,
-                user_id TEXT, 
-                FOREIGN KEY (user_id) REFERENCES {self.users_table_name}(ID)
-                );""")
+# c.execute("""DROP TABLE Users""")
 
-c.execute('''INSERT INTO users (email, fname, lname, username, password, balance)
-                VALUES  ('johnsmith@umich.edu', 'John', 'Smith', 'johnsmith1', 'johnsmith12345', 100.00),
-                        ('cooperkupp@umich.edu', 'Cooper', 'Kupp', 'cooperkupp2', 'cooperkupp12345', 100.0),
-                        ('mattstafford@umich.edu', 'Matt', 'Stafford', 'mattstafford3', 'mattstafford12345', 100.00),
-                        ('traviskelce@umich.edu', 'Travis', 'Kelce', 'traviskelce4', 'traviskelce12345', 100.00),
-                        ('imammar@umich.edu', 'Abe', 'Ammar', 'abeammar5', 'abeammar12345', 100.00)''')
+conn.commit()
 
-c.execute('''INSERT INTO crypto (id, cname, cbalance, user_id, key)
-                VALUES  ('Bitcoin', 30.0, 1)''')
+c.execute("""CREATE TABLE IF NOT EXISTS Cryptos 
+                        ( 
+                        ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                        crypto_name varchar(10) NOT NULL, 
+                        crypto_balance DOUBLE, 
+                        user_id int, 
+                        FOREIGN KEY (user_id) REFERENCES Users (ID) 
+                        );""")
 
 
 
