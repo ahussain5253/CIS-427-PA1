@@ -1,4 +1,5 @@
 import socket
+import sqlite3
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print('socket created')
@@ -8,18 +9,12 @@ print ('Socket binded to port')
 s.listen(5)
 print ('socket is listening')
 
-while True:
-    clt, adr = s.accept()
-    print ('Got connection from ', adr)
-    clt.send(bytes("Thank you for connecting", "utf-8"))
-    clt.close()
-
 conn = sqlite3.connect('cis427_crypto.sqlite')
 c = conn.cursor()
 
-c.execute("""create table if not exists Users 
+c.execute("""CREATE TABLE IF NOT EXISTS Users 
                         (
-                        ID int NOT NULL AUTO_INCREMENT, 
+                        ID int NOT NULL, 
                         first_name varchar(255), 
                         last_name varchar(255), 
                         user_name varchar(255) NOT NULL, 
@@ -39,6 +34,14 @@ c.execute("""create table if not exists Cryptos
                         PRIMARY KEY (ID), 
                         FOREIGN KEY (user_id) REFERENCES Users ID) 
                         );""")
+
+
+while True:
+    clt, adr = s.accept()
+    print ('Got connection from ', adr)
+    clt.send(bytes("Thank you for connecting", "utf-8"))
+    clt.close()
+
 
 while True:
 
