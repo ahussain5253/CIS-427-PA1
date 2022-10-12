@@ -1,33 +1,31 @@
 import socket
 
-s = socket.socket()
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print('socket created')
-port = 56789
+port = 5534
 s.bind(('', port))
 print ('Socket binded to port')
 s.listen(5)
 print ('socket is listening')
 
 while True:
-    c, addr = s.accept()
-    print ('Got connection from ', addr)
-    message = ('Thanks for connecting')
-    c.send(message.encode())
-    c.close()
+    clt, adr = s.accept()
+    print ('Got connection from ', adr)
+    clt.send(bytes("Thank you for connecting", "utf-8"))
+    clt.close()
 
 conn = sqlite3.connect('cis427_crypto.sqlite')
 c = conn.cursor()
 
-c.execute("""CREATE TABLE IF NOT EXISTS
-                users(  
-                ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                email TEXT NOT NULL,
-                first_name TEXT,
-                last_name TEXT,
-                user_name TEXT NOT NULL,
-                password TEXT,         
-                usd_balance DOUBLE NOT NULL
-                );""")
+c.execute("""create table if not exists Users 
+                        (
+                        ID int NOT NULL AUTO_INCREMENT, 
+                        first_name varchar(255), 
+                        last_name varchar(255), 
+                        user_name varchar(255) NOT NULL, 
+                        password varchar(255), 
+                        usd_balance DOUBLE NOT NULL, 
+                        PRIMARY KEY (ID) );""")
 
 c.execute("""CREATE TABLE IF NOT EXISTS
                 cryptos(

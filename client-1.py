@@ -1,9 +1,10 @@
 import socket
 
-c = socket.socket()
-port = 56789
+c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+port = 5534
 c.connect(('127.0.0.1', port))
-print(c.recv(1024))   
+message = c.recv(1024)
+print(message.decode("utf-8"))
 c.close()
 
 while True:
