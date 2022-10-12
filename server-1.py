@@ -63,12 +63,11 @@ while True:
 while True:
 
 
-        def buy_command():
+        # def buy_command():
 
 
 
         def sell_command():
-
                 usd_balance = float(crypto_q) * float(usd_price)
                 crypto_balance = str(float(crypto_balance) - float(crypto_q))
 
@@ -79,7 +78,7 @@ while True:
 
 
 
-        def getlist():
+        # def getlist():
 
 
 
@@ -101,24 +100,24 @@ while True:
                         c.send("Quitting Client!")
                         break
 
-                elif message_recieved == 'BUY' or message_recieved == 'buy':
-                        message_back =
+                # elif message_recieved == 'BUY' or message_recieved == 'buy':
+                #         message_back =
 
-                elif message_recieved == 'SELL' or message_recieved == 'sell':
-                        message_back =
+                # elif message_recieved == 'SELL' or message_recieved == 'sell':
+                #         message_back =
 
-                elif message_recieved == 'LIST' or message_recieved == 'list':
-                        message_back =
-                        c.send(("200 OK \n")).encode()
+                # elif message_recieved == 'LIST' or message_recieved == 'list':
+                #         message_back =
+                #         c.send(("200 OK \n")).encode()
 
-                elif message_recieved == 'BALANCE' or message_recieved == 'balance':
-                        message_back =
-                        c.send(("200 OK \n")).encode()
+                # elif message_recieved == 'BALANCE' or message_recieved == 'balance':
+                #         message_back =
+                #         c.send(("200 OK \n")).encode()
 
-                elif message_recieved == 'SHUTDOWN' or message_recieved == 'shutdown':
-                        c.send("Shutting Down!").encode()
-                        c.send(("200 OK \n")).encode()
-                        break
+                # elif message_recieved == 'SHUTDOWN' or message_recieved == 'shutdown':
+                #         c.send("Shutting Down!").encode()
+                #         c.send(("200 OK \n")).encode()
+                #         break
 
 
         conn.close()
