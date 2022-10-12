@@ -8,10 +8,12 @@ print(message.decode("utf-8"))
 
 
 while True:
-        message = input("Commands-> BUY \n SELL \n BALANCE \n LIST \n SHUTDOWN \n QUIT \n\n ->")
-        print(message)
+        message = input("\nPlease choose a command:\n\n BUY \n SELL \n BALANCE \n LIST \n SHUTDOWN \n QUIT \n\n ->")
+        print('\nYour input: ' + message)
 
         if(message == 'BUY'): 
+
+                
 
                 break
 
