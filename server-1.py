@@ -25,26 +25,20 @@ c.execute("""create table if not exists Users
                         user_name varchar(255) NOT NULL, 
                         password varchar(255), 
                         usd_balance DOUBLE NOT NULL, 
-                        PRIMARY KEY (ID) );""")
+                        PRIMARY KEY (ID) 
+                        );""")
 
-c.execute("""CREATE TABLE IF NOT EXISTS
-                cryptos(
-                ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                crypto_name varchar(10) NOT NULL,
-                crypto_balance DOUBLE,
-                user_id TEXT, 
-                FOREIGN KEY (user_id) REFERENCES {self.users_table_name}(ID)
-                );""")
+conn.commit()
 
-c.execute('''INSERT INTO users (email, fname, lname, username, password, balance)
-                VALUES  ('johnsmith@umich.edu', 'John', 'Smith', 'johnsmith1', 'johnsmith12345', 100.00),
-                        ('cooperkupp@umich.edu', 'Cooper', 'Kupp', 'cooperkupp2', 'cooperkupp12345', 100.0),
-                        ('mattstafford@umich.edu', 'Matt', 'Stafford', 'mattstafford3', 'mattstafford12345', 100.00),
-                        ('traviskelce@umich.edu', 'Travis', 'Kelce', 'traviskelce4', 'traviskelce12345', 100.00),
-                        ('imammar@umich.edu', 'Abe', 'Ammar', 'abeammar5', 'abeammar12345', 100.00)''')
-
-c.execute('''INSERT INTO crypto (id, cname, cbalance, user_id, key)
-                VALUES  ('Bitcoin', 30.0, 1)''')
+c.execute("""create table if not exists Cryptos 
+                        ( 
+                        ID int NOT NULL AUTO_INCREMENT, 
+                        crypto_name varchar(10) NOT NULL, 
+                        crypto_balance DOUBLE, 
+                        user_id int, 
+                        PRIMARY KEY (ID), 
+                        FOREIGN KEY (user_id) REFERENCES Users ID) 
+                        );""")
 
 while True:
 
@@ -65,7 +59,5 @@ while True:
 
                 
 
-
-        conn.commit()
         conn.close()
 
