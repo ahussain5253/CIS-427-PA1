@@ -1,26 +1,30 @@
 import socket
+import sys
 
-c = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-port = 5534
-c.connect(('127.0.0.1', port))
-message = c.recv(1024)
-print(message.decode("utf-8"))
 
+# Server name and Port number
+HOST = '127.0.0.1'
+PORT = 7563
+
+# create a socket at CLIENT side
+client_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+client_socket.connect((HOST,PORT)) #connecting to host and port
+msg = ("CONNECTED") #printing message CONNECTED
+print(msg) #PRINT
 
 while True:
-        message = input("\nPlease choose a command:\n\n BUY \n SELL \n BALANCE \n LIST \n SHUTDOWN \n QUIT \n\n ->")
-        print('\nYour input: ' + message)
+        #TAKING INPUT OF USER
+        message = input("Commands-> BUY \n SELL \n BALANCE \n LIST \n SHUTDOWN \n QUIT \n\n ->") 
+        client_socket.send(message.encode())
+        
+        result = client_socket.recv(1024)
 
-        if(message == 'BUY'): 
-
-                
-
+        #If result of message is quit or shutdown, then disconnect from server
+        if(result == 'QUIT' or 'SHUTDOWN'): 
+                print("Closing Client Connection! Goodbye!")
                 break
 
-
-               
-
-
-c.close()
+#disconnect the client
+client_socket.close()
 
 
