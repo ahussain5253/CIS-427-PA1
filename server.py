@@ -53,7 +53,9 @@ def buyCommand(cryptoName, cryptoAmt, pricePerCrypto, userID, command):
     conn.commit()
 
 
-
+def deleteCommand():
+    u.execute("DROP TABLE Cryptos;")
+    conn.commit()
 
 while True: 
     c, addr = s.accept()
@@ -71,7 +73,8 @@ while True:
         buyCommand(name,camt,ppc,uid,command)
 
     elif splitcommand[0] == 'DELETE':
-        u.execute("""DROP TABLE Users;""")
+        deleteCommand()
+        
 
     
 
