@@ -41,18 +41,15 @@ conn.commit()
 
 def buy(command, cryptoName, cryptoAmt, pricePerCrypto, userID):
 
-    print('\nRecieved: ' + command + '\n')
+    print('\nRecieved: ' + command + '\n' + '200 OK \n')
     
     amt = float(cryptoAmt)
     ppc = float(pricePerCrypto)
     
     price = amt * ppc
-    
-    print('Total Price: ', price)  
-    print('\n')
 
-    # u.execute("INSERT INTO Cryptos VALUES (?,?,?,?)", (userID, cryptoName, cryptoAmt, userID))
-    # conn.commit()
+    u.execute("INSERT INTO Cryptos (crypto_name, crypto_balance, user_id) VALUES (?,?,?)", (cryptoName, cryptoAmt, userID))
+    conn.commit()
 
 def shutdown():
     
@@ -103,10 +100,10 @@ while True:
     
     tof = input("Would you like to do something else? Type Y or N \n\n")
     
-    if (tof == 'N' or 'n'):
-        
-        print("\nServer shutting down... Have a great day!")        
+    if (tof == 'N') or (tof == 'n'):
+        print("Server shutting down... Have a great day!")        
         shutdown()
+
     
     
     
