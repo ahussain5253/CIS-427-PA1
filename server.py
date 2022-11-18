@@ -1,3 +1,4 @@
+import threading
 import socket
 import sqlite3
 
@@ -53,8 +54,8 @@ def buyCommand(cryptoName, cryptoAmt, pricePerCrypto, userID, command):
     conn.commit()
 
 
-def deleteCommand():
-    u.execute("DROP TABLE Cryptos;")
+def deleteCommand(table):
+    u.execute("DROP TABLE ?", (table,))
     conn.commit()
 
 while True: 
@@ -73,7 +74,10 @@ while True:
         buyCommand(name,camt,ppc,uid,command)
 
     elif splitcommand[0] == 'DELETE':
-        deleteCommand()
+        
+        
+        table = input("Enter name: \n")
+        deleteCommand(table)
         
 
     
