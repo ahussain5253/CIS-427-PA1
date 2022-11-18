@@ -84,7 +84,7 @@ while True:
     
     if (splitcommand[0] == 'SHUTDOWN'):
         
-        print("Server shutting down... Have a great day!")        
+        print("\nServer shutting down... Have a great day!\n")        
         shutdown()
     
     
