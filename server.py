@@ -1,11 +1,10 @@
 # import threading
 # import socket
-from decimal import Decimal
 import sqlite3
 
 #Connect database
 conn = sqlite3.connect('cis427_crypto.sqlite')
-u= conn.cursor()
+u = conn.cursor()
 
 #Create users table
 u.execute("""CREATE TABLE IF NOT EXISTS Users
@@ -19,13 +18,11 @@ u.execute("""CREATE TABLE IF NOT EXISTS Users
                 );""")
 
 #Check if Users is empty
-isEmpty = u.execute("SELECT count(*) FROM Users")
-
-#Insert default user
-if (isEmpty == 0):
-    u.execute("INSERT INTO Users (first_name, last_name, user_name, password, usd_balance) VALUES ('First', 'User','fuser','first', 100);")
-    conn.commit()
-
+cur = u.execute("SELECT count(*) FROM Users")
+for row in cur:
+    if (row[0] == 0):
+        #Insert default user
+        u.execute("INSERT INTO Users (ID, first_name, last_name, user_name, password, usd_balance) VALUES (1, 'Default', 'User','DefUser','defu', 100);")
 
 #Create Cryptos table
 u.execute("""CREATE TABLE IF NOT EXISTS Cryptos
@@ -39,40 +36,120 @@ u.execute("""CREATE TABLE IF NOT EXISTS Cryptos
 
 conn.commit()
 
-def buy(command, cryptoName, cryptoAmt, pricePerCrypto, userID):
-
-    print('\nRecieved: ' + command + '\n' + '200 OK \n')
+def create():
     
-    amt = float(cryptoAmt)
-    ppc = float(pricePerCrypto)
-    
-    price = amt * ppc
-
-    u.execute("INSERT INTO Cryptos (crypto_name, crypto_balance, user_id) VALUES (?,?,?)", (cryptoName, cryptoAmt, userID))
+    id = input("\nEnter New User ID: \n\n")
+    fname = input("\nEnter First Name: \n\n")
+    lname = input("\nEnter Last Name: \n\n")
+    uname = input("\nEnter New Username: \n\n")
+    pswd = input("\nEnter New Password: \n\n")
+    balance = input("\nEnter New Balance: \n\n")
+    print('\nNew User ' + uname + ' has been added\n\n')
+        
+    u.execute("INSERT INTO Users VALUES (?, ?, ?, ?, ?, ?)", (id, fname, lname, uname, pswd, balance))
     conn.commit()
 
-def shutdown():
+def addFunds(amt,userID):
     
-    exit()
+    for row in u.execute("SELECT usd_balance FROM Users WHERE ID = ?", (userID)):
+        currAmt = row[0]
+        break
+    
+    currAmt += amt
+    
+    u.execute("UPDATE Users SET usd_balance = ? WHERE ID = ?", (currAmt, userID))
+    conn.commit()
+    
+    print("\n\nFunds added successfully\nNew Balance: $", currAmt)
+    print("\n")
 
 
+def buy(command, cryptoName, cryptoAmt, pricePerCrypto, userID):
+    
+    for row in u.execute("SELECT count(*) FROM Users WHERE ID = ?", userID):
+        uidexists = row[0]
 
+    #Checks if user id exists or not then prompts to make a new one
+    if (uidexists == 0):
+        createUID = input("\n\n400 message format error\nUser ID not found\nMake new user? Type Y or N\n\n")
+        
+        if (createUID == 'y') or (createUID == 'Y'):
+            create()
+    else:            
+        print('\nRecieved: ' + command + '\n' + '200 OK')
+    
+        amt = float(cryptoAmt)
+        ppc = float(pricePerCrypto)
+    
+        price = amt * ppc
+    
+        #Update user balance in database
+        for row in u.execute("SELECT usd_balance FROM Users WHERE ID = ?", (userID)):
+            currAmt = row[0]
+            break
+        
+        #Checks if the user has enough to pay for crypto by looking at their current balance
+        if (currAmt < price):
+            balError = input("\n\n409 balance error\nNot enough balance in account\nAdd funds? Type Y or N\n\n")
+            
+            if (balError == 'y') or (balError == 'Y'):
+                
+                amt = input("\nHow much do you want to add?\n\n")
+                famt = float(amt)
+                
+                addFunds(famt, userID)            
+            
+        else:       
+            currAmt -= price
+    
+            u.execute("UPDATE Users SET usd_balance = ? WHERE ID = ?", (currAmt, userID))
+            conn.commit()
+    
+            #Checks if there is a record for the user id. If not, adds one
+            curr = u.execute("SELECT count(*) FROM Cryptos WHERE user_id = ? AND crypto_name = ?", (userID, cryptoName))
+            for row in curr:
+                if (row[0] == 0):
+                    u.execute("INSERT INTO Cryptos (crypto_name, crypto_balance, user_id) VALUES (?,?,?)", (cryptoName, cryptoAmt, userID))
+                    conn.commit()
+            
+                    for row in u.execute("SELECT crypto_balance FROM Cryptos WHERE user_id = ? AND crypto_name = ?", (userID, cryptoName)):
+                        cryptBal = row[0] 
+                 
+                        newBal = str(cryptBal)
+                 
+                        print("BOUGHT: New balance: " + newBal + " " + cryptoName + ". " + "USD balance $%.2f" % currAmt + "\n") 
+                        break 
+            
+            
+                else:
+                    for row in u.execute("SELECT crypto_balance FROM Cryptos WHERE user_id = ? AND crypto_name = ?", (userID, cryptoName)):
+                        cryptBal = row[0]
+                
+                        nAmt = float(cryptoAmt)
+                        cryptBal += nAmt
+                
+                        u.execute("UPDATE Cryptos SET crypto_balance = ? WHERE user_id = ? AND crypto_name = ?", (cryptBal, userID, cryptoName))
+                        conn.commit()
+                
+                        newBal = str(cryptBal)
+    
+                        print("BOUGHT: New balance: " + newBal + " " + cryptoName + ". " + "USD balance $%.2f" % currAmt + "\n")
 
-
-def delete(table):
+                        break  
        
-    if (table == 'U'):
-        u.execute("DROP TABLE Users")
-    elif (table == 'C'):
-        u.execute("DROP TABLE Cryptos")
-
+def shutdown():
+    exit()
 
 while True:
     
-    fullcommand = input("\nType in full command \n\n BUY \n SELL \n BALANCE \n LIST \n SHUTDOWN \n QUIT \n DELETE \n\n ->")
+    command = input("\nType in full command \n\n CREATE \n BUY \n SELL \n BALANCE \n LIST \n CUSTOM \n SHUTDOWN \n QUIT \n\n ->")
 
-    splitcommand = fullcommand.split()
+    splitcommand = command.split()
     
+    if (splitcommand[0] == 'CREATE'):
+               
+        create()
+        
     if (splitcommand[0] == 'BUY'):
         
         name = splitcommand[1]
@@ -80,7 +157,13 @@ while True:
         ppc = splitcommand[3]
         uid = splitcommand[4]
         
-        buy(fullcommand, name, amt, ppc, uid)
+        buy(command, name, amt, ppc, uid)
+                
+    if (splitcommand[0] == 'CUSTOM'):
+        
+        query = input("\nPlease type the query in SQL: \n\n")
+        u.execute(query)
+        print('\nQuery processed successfully\n')
     
     if (splitcommand[0] == 'SHUTDOWN'):
         
@@ -88,20 +171,11 @@ while True:
         shutdown()
     
     
-    
-    
-    
-    if (splitcommand[0] == 'DELETE'):
-        
-        table = input("Which table to delete? Type U (User) or C (Cryptos)")
-        
-        delete(table)
-    
-    
+
     tof = input("Would you like to do something else? Type Y or N \n\n")
     
     if (tof == 'N') or (tof == 'n'):
-        print("Server shutting down... Have a great day!")        
+        print("\nServer shutting down... Have a great day!\n")        
         shutdown()
 
     
