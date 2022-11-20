@@ -276,14 +276,11 @@ def list(user_id):
         
         print("\n")
 
-
-
-
+def shutdown():
+    exit()
 
 def quit():
     print("quit")
-
-def shutdown():
     exit()
 
 while True:
