@@ -60,8 +60,7 @@ def addFunds(amt,userID):
     u.execute("UPDATE Users SET usd_balance = ? WHERE ID = ?", (currAmt, userID))
     conn.commit()
     
-    print("\n\nFunds added successfully\nNew Balance: $", currAmt)
-    print("\n")
+    print("\n\nFunds added successfully\nNew Balance: $%.2f" % currAmt + "\n")
 
 
 def buy(command, cryptoName, cryptoAmt, pricePerCrypto, userID):
