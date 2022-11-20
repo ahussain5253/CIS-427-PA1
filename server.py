@@ -5,23 +5,18 @@ import sqlite3
 conn = sqlite3.connect('cis427_crypto.sqlite')
 u = conn.cursor()
 
-PORT = 5534
-sock = socket.socket()
+#Creating Socket
+s = socket.socket()
 print('Socket succesfully created')
-sock.bind(('', PORT))
-print(f'socket binded to port {PORT}')
-sock.listen(5)
+
+#Creating Port
+port = 5534
+s.bind(('', port))
+print(f'socket binded to port{port}')
+
+#Socket is awaiting response from client
+s.listen(5)
 print('Socket is listening')
-
-while True:
-    c, addr = sock.accept()
-    print("Got connection from", addr)
-    message = "Thank you for connecting"
-    c.send(message.encode())
-
-    c.close()
-
-
 
 #Create users table
 u.execute("""CREATE TABLE IF NOT EXISTS Users
@@ -50,8 +45,6 @@ u.execute("""CREATE TABLE IF NOT EXISTS Cryptos
                         user_id int, 
                         FOREIGN KEY (user_id) REFERENCES Users (ID)
                 );""")
-
-conn.commit()
 
 def create():
     
@@ -91,7 +84,9 @@ def buy(command, cryptoName, cryptoAmt, pricePerCrypto, userID):
         if (createUID == 'y') or (createUID == 'Y'):
             create()
     else:            
-        print('\nRecieved: ' + command + '\n' + '200 OK')
+        print('\nRecieved: ' + command + '\n')
+
+        c.send("200 OK".encode())
     
         amt = float(cryptoAmt)
         ppc = float(pricePerCrypto)
@@ -298,14 +293,15 @@ def shutdown():
 
 def quit():
     print("quit")
-    exit()
 
-while True:
-    
-    command = input("\nType in full command \n\n BUY \n SELL \n BALANCE \n LIST \n CUSTOM \n SHUTDOWN \n QUIT \n\n ->")
 
+while True: 
+    c, addr = s.accept()
+    print('Got connection from', addr)
+
+    command = c.recv(1024).decode()
     splitcommand = command.split()
-        
+
     if (splitcommand[0] == 'BUY'):
         
         name = splitcommand[1]
@@ -348,81 +344,3 @@ while True:
     if (splitcommand[0] == 'QUIT'):
 
         quit()
-    
-
-    tof = input("Would you like to do something else? Type Y or N \n\n")
-    
-    if (tof == 'N') or (tof == 'n'):
-        print("\nServer shutting down... Have a great day!\n")        
-        shutdown()
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-#Creating Socket
-# s = socket.socket()
-# print('Socket succesfully created')
-
-# #Creating Port
-# port = 56789
-# s.bind(('', port))
-# print(f'socket binded to port{port}')
-
-# #Socket is awaiting response from client
-# s.listen(5)
-# print('Socket is listening')
-
-# while True: 
-#     c, addr = s.accept()
-#     print('Got connection from', addr)
-
-#     command = c.recv(1024).decode()
-#     splitcommand = command.split()
-
-#     if splitcommand[0] == 'BUY':
-#         name = splitcommand[1]
-#         camt = splitcommand[2]
-#         ppc = splitcommand[3]
-#         uid = splitcommand[4]
-
-#         buyCommand(name,camt,ppc,uid,command)
-
-#     elif splitcommand[0] == 'DELETE':
-        
-        
-#         table = input("Enter name: \n")
-#         deleteCommand(table)
-        
-
-    
-
-# message = ('Thank you for connecting')
-# s.send(message.encode())
-
-# print(c.recv(1024))
-# c.close()
