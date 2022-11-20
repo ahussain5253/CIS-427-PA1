@@ -163,9 +163,9 @@ def sell(command, cryptoName, cryptoAmt, pricePerCrypto, userID):
         else:
             for row in u.execute("SELECT count(*) FROM Cryptos WHERE crypto_name = ? AND user_id = ?", (cryptoName, userID)):
                 crypuidExists = row[0]
-            
+
             if (crypuidExists == 0):
-                bCrypto = input("\n\n300 no crypto record found for user error\nCrypto specified has never been bought by user and has no record\nWould you like to buy some " + cryptoName + " crypto? Type Y or N\n\n")
+                bCrypto = input("\n\n400 no crypto record found for user error\nCrypto specified has never been bought by user and has no record\nWould you like to buy some " + cryptoName + " crypto? Type Y or N\n\n")
                 
                 if (bCrypto == 'y') or (bCrypto == 'Y'):
                     cryptoAmt = input("\n\nType in the amount of "+ cryptoName +" to buy\n\n")
@@ -173,7 +173,22 @@ def sell(command, cryptoName, cryptoAmt, pricePerCrypto, userID):
                     
                     buy("BUY", cryptoName, cryptoAmt, pricePerCrypto, userID)
                 
-                else:         
+            else:
+                for row in u.execute("SELECT crypto_balance FROM Cryptos WHERE crypto_name = ? AND user_id = ?", (cryptoName, userID)):
+                    cBal = row[0]
+                
+                uamt = float(cryptoAmt)
+
+                if (uamt > cBal):
+                    byCrypto = input("\n\n400 not enough crypto to sell error\nUser ID #"+ userID +" does not have enough " + cryptoName + " in their balance to sell\nWould you like to buy more " + cryptoName + "? Type Y or N\n\n")
+
+                    if (byCrypto == 'y') or (byCrypto == 'Y'):
+                        cryptoAmt = input("\n\nType in the amount of "+ cryptoName +" to buy\n\n")
+                        pricePerCrypto = input("\n\nType in the price per each "+ cryptoName +"\n\n")
+                    
+                        buy("BUY", cryptoName, cryptoAmt, pricePerCrypto, userID)
+                
+                else:
                     print('\nRecieved: ' + command + '\n' + '200 OK')
     
                     amt = float(cryptoAmt)
@@ -203,21 +218,79 @@ def sell(command, cryptoName, cryptoAmt, pricePerCrypto, userID):
     
                         print("SOLD: New balance: " + newBal + " " + cryptoName + ". " + "USD balance $%.2f" % currAmt + "\n")
 
-                        break 
+                        break        
        
-       
+def balance(user_id):
+    for row in u.execute("SELECT count(*) FROM Users WHERE ID = ?", (user_id)):
+        uidex = row[0]
+
+    if (uidex == 0):
+        createUser = input("\n\n400 user not found error\nUser ID not found\nMake new user? Type Y or N\n\n")    
+
+        if (createUser == 'y') or (createUser == 'Y'):    
+            create()
+   
+    else:
+        print("\n\nRecieved: BALANCE\n200 OK")
+
+        for row in u.execute("SELECT usd_balance FROM Users WHERE ID = ?", (user_id)):
+            cbal = row[0]
+        
+        for row in u.execute("SELECT first_name FROM Users WHERE ID = ?", (user_id)):
+            fname = row[0]
+
+        for row in u.execute("SELECT last_name FROM Users WHERE ID = ?", (user_id)):
+            lname = row[0]
+        
+        currbal = str(cbal)
+
+        print("\n\nBalance for user " + fname + " " + lname + ": $%.2f" % cbal)
+        print("\n\n")
+
+def list(user_id):
+
+    for row in u.execute("SELECT count(*)FROM Cryptos WHERE user_id = ?", (user_id)):
+        uidex = row[0]
+    
+    if (uidex == 0):
+        muser = input("\n\n400 no such user found in Cryptos error\nUser ID specified not found in Crytpos\nWould you like to purchase crypto? Type Y or N\n\n")
+
+        if (muser == 'y') or (muser == 'Y'):
+            cryptoName = input("\n\nType in the name of the crypto to buy\n\n")
+            cryptoAmt = input("\n\nType in the amount of crypto to buy\n\n")
+            pricePerCrypto = input("\n\nType in the price per each crypto\n\n")
+                
+            buy("BUY", cryptoName, cryptoAmt, pricePerCrypto, user_id)
+
+    else:
+        print("\n\nRecieved: LIST\n200 OK\nThe list of records in the Crypto database for user " + user_id + ":\n")
+
+        num = 1
+
+        records = u.execute("SELECT crypto_name, crypto_balance, user_id FROM Cryptos WHERE user_id = ?", (user_id))
+        for row in records:
+
+            print(str(num) + "  " + row[0] + " " + str(row[1]) + " " + str(row[2]))
+
+            num += 1
+        
+        print("\n")
+
+
+
+
+
+def quit():
+    print("quit")
+
 def shutdown():
     exit()
 
 while True:
     
-    command = input("\nType in full command \n\n CREATE \n BUY \n SELL \n BALANCE \n LIST \n CUSTOM \n SHUTDOWN \n QUIT \n\n ->")
+    command = input("\nType in full command \n\n BUY \n SELL \n BALANCE \n LIST \n CUSTOM \n SHUTDOWN \n QUIT \n\n ->")
 
     splitcommand = command.split()
-    
-    if (splitcommand[0] == 'CREATE'):
-                     
-        create()
         
     if (splitcommand[0] == 'BUY'):
         
@@ -236,7 +309,17 @@ while True:
         uid = splitcommand[4]
         
         sell(command, name, amt, ppc, uid)    
-                
+
+    if (splitcommand[0] == 'BALANCE'):
+        uid = input("\n\nEnter the User ID you want to see the balance for: \n\n")
+
+        balance(uid)
+
+    if (splitcommand[0] == 'LIST'):
+        uid = input("\n\nEnter the User ID you want to list all records for: \n\n")
+
+        list(uid)
+    
     if (splitcommand[0] == 'CUSTOM'):
         
         query = input("\nPlease type the query in SQL: \n\n")
@@ -248,6 +331,9 @@ while True:
         print("\nServer shutting down... Have a great day!\n")        
         shutdown()
     
+    if (splitcommand[0] == 'QUIT'):
+
+        quit()
     
 
     tof = input("Would you like to do something else? Type Y or N \n\n")
