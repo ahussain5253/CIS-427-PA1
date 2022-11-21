@@ -1,7 +1,6 @@
 import socket
 import threading
 
-alias = input('Choose a name: ')
 PORT = 5534
 
 sock = socket.socket()
@@ -15,14 +14,21 @@ while True:
 
     sock.send(bytes(command,'utf-8'))
 
-    print(sock.recv(1024))
-
-    tof = input("\nWould you like to do something else? Type Y or N \n\n")
-    
-    if (tof == 'N') or (tof == 'n'):
-        print("\nServer shutting down... Have a great day!\n")
-        sock.close()   
-        break     
+    while True:
+        
+        message = sock.recv(1024)
+        
+        if (message == "STOP".encode()):
+            break
+        elif (message ==  "QUIT".encode()):
+            print("\nQUIT\n200 OK\n")
+            exit()
+        elif(message == "SHUTDOWN".encode()):
+            print("\n200 OK\n")
+            exit()
+        else:
+            print(message)
+               
 
 
 

@@ -100,7 +100,8 @@ def buy(command, cryptoName, cryptoAmt, pricePerCrypto, userID):
         
         #Checks if the user has enough to pay for crypto by looking at their current balance
         if (currAmt < price):
-            balError = input("\n\n409 balance error\nNot enough balance in account\nAdd funds? Type Y or N\n\n")
+            c.send("409 balance error\nNot enough balance in account\nAdd funds? Type Y or N".encode()) 
+            balError = c.recv(1024)
             
             if (balError == 'y') or (balError == 'Y'):
                 
@@ -142,8 +143,9 @@ def buy(command, cryptoName, cryptoAmt, pricePerCrypto, userID):
                         conn.commit()
                 
                         newBal = str(cryptBal)
-    
-                        print("BOUGHT: New balance: " + newBal + " " + cryptoName + ". " + "USD balance $%.2f" % currAmt + "\n")
+
+                        message = "BOUGHT: New balance: " + newBal + " " + cryptoName + ". " + "USD balance $%.2f" % currAmt
+                        c.send(message.encode())
 
                         break  
    
@@ -288,16 +290,17 @@ def list(user_id):
         
         print("\n")
 
-def shutdown():
-    exit()
+instance = 0
 
-def quit():
-    print("quit")
-
+quitCom = 0
 
 while True: 
-    c, addr = server.accept()
-    print('Got connection from', addr)
+    
+    if (instance == 0) or (quitCom == 1):
+        c, addr = server.accept()
+        print('Got connection from', addr)
+        
+        quitCom = 0
 
     command = c.recv(1024).decode()
     splitcommand = command.split()
@@ -337,10 +340,14 @@ while True:
         print('\nQuery processed successfully\n')
     
     if (splitcommand[0] == 'SHUTDOWN'):
-        
-        print("\nServer shutting down... Have a great day!\n")        
-        shutdown()
-    
+        print("\nReceived: SHUTDOWN\n")
+        c.send("SHUTDOWN".encode())  
+        exit()      
+         
     if (splitcommand[0] == 'QUIT'):
-
-        quit()
+        c.send("QUIT".encode())
+        quitCom = 1
+                 
+    c.send("STOP".encode())
+        
+    instance = 1
