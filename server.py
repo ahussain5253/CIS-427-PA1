@@ -100,8 +100,7 @@ def buy(command, cryptoName, cryptoAmt, pricePerCrypto, userID):
         
         #Checks if the user has enough to pay for crypto by looking at their current balance
         if (currAmt < price):
-            c.send("409 balance error\nNot enough balance in account\nAdd funds? Type Y or N".encode()) 
-            balError = c.recv(1024)
+            balError = input("\n\n409 balance error\nNot enough balance in account\nAdd funds? Type Y or N")
             
             if (balError == 'y') or (balError == 'Y'):
                 
@@ -203,7 +202,9 @@ def sell(command, cryptoName, cryptoAmt, pricePerCrypto, userID):
                         buy("BUY", cryptoName, cryptoAmt, pricePerCrypto, userID)
                 
                 else:
-                    print('\nRecieved: ' + command + '\n' + '200 OK')
+                    print('\nRecieved: ' + command + '\n')
+                    
+                    c.send("200 OK".encode())
     
                     amt = float(cryptoAmt)
                     ppc = float(pricePerCrypto)
@@ -221,19 +222,19 @@ def sell(command, cryptoName, cryptoAmt, pricePerCrypto, userID):
     
                     for row in u.execute("SELECT crypto_balance FROM Cryptos WHERE user_id = ? AND crypto_name = ?", (userID, cryptoName)):
                         cryptBal = row[0]
+                        break
                 
-                        nAmt = float(cryptoAmt)
-                        cryptBal -= nAmt
+                    nAmt = float(cryptoAmt)
+                    cryptBal -= nAmt
                 
-                        u.execute("UPDATE Cryptos SET crypto_balance = ? WHERE user_id = ? AND crypto_name = ?", (cryptBal, userID, cryptoName))
-                        conn.commit()
+                    u.execute("UPDATE Cryptos SET crypto_balance = ? WHERE user_id = ? AND crypto_name = ?", (cryptBal, userID, cryptoName))
+                    conn.commit()
                 
-                        newBal = str(cryptBal)
-    
-                        print("SOLD: New balance: " + newBal + " " + cryptoName + ". " + "USD balance $%.2f" % currAmt + "\n")
-
-                        break        
-       
+                    newBal = str(cryptBal)
+                        
+                    message = "SOLD: New balance: " + newBal + " " + cryptoName + ". " + "USD balance $%.2f" % currAmt
+                    c.send(message.encode())
+                          
 def balance(user_id):
     for row in u.execute("SELECT count(*) FROM Users WHERE ID = ?", (user_id)):
         uidex = row[0]
