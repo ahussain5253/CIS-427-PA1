@@ -291,6 +291,68 @@ def list(user_id):
         
         print("\n")
 
+def login(command, userID, pswd):
+
+    for row in u.execute("SELECT count(*) FROM Users WHERE ID = ?", userID):
+        uidexistsUs = row[0]
+
+    for row in u.execute("SELECT count(*) FROM WHERE PASSWORD = ?", pswd):
+        pswdexistsUs= row[0]
+    
+    if (uidexistsUs == 0):
+        print("403 Wrong UserID or Password")
+    elif (pswdexistsUs == 0):
+        print("403 Wrong UserID or Password")
+    else:
+        print("\nReceived: " + command + '\n' + '200 OK')
+
+def logout():
+    print("logout")
+    print("\n" + '200 OK')
+    exit()
+
+def deposit(amt, userID):
+    for row in u.execute("SELECT usd_balance FROM Users WHERE ID = ?", (userID)):
+        currAmt = row[0]
+        break
+    
+    currAmt += amt
+    
+    u.execute("UPDATE Users SET usd_balance = ? WHERE ID = ?", (currAmt, userID))
+    conn.commit()
+    
+    print("\n Deposit successfully \n New Balance: $%.2f" % currAmt + "\n")
+
+def lookup(name):
+    for row in u.execute("SELECT count(*) FROM Users WHERE name = ?", name):
+        unameexists = row[0]
+
+    if(unameexists == 0):
+        print("404 Your search did not match any records")
+
+    else:
+        print("\n" + '200 OK')    
+        num = 1
+        print("\n Found" + num + "match")
+        records = u.execute("SELECT crypto_name", name)
+        for row in records:
+            print(str(num) + " " + row[0] + " " + str(row[1]) + " " + str(row[2]))
+            num += 1
+        print("\n")
+
+def who(user_id):
+    print("\n" + '200 OK') 
+    print("\n The list of active users: ")
+    num = 1
+    user_id = socket.gethostname
+    IPAddress = socket.gethostbyname(user_id)
+    records = u.execute("SELECT user_id FROM Cryptos WHERE user_id = ?", (user_id, IPAddress))
+    for row in records:
+        print(str(num) + " " + row[0] + " " + str(row[1]) + " " + str(row[2]))
+        num += 1
+    print("\n")
+
+                                 
 instance = 0
 
 quitCom = 0
@@ -352,3 +414,24 @@ while True:
     c.send("STOP".encode())
         
     instance = 1
+
+    if (splitcommand[0] == 'LOGIN'):
+        uid = splitcommand[1]
+        pswd = splitcommand[2]
+
+        login(command, uid, pswd)
+
+    if (splitcommand[0] == 'LOGOUT'):
+        logout()
+
+    if (splitcommand[0] == 'LOOKUP'):
+        name = input("\n\nEnter the name you want to lookup Crypto records for: \n\n")
+
+        lookup(name)
+    
+    if (splitcommand[0] == 'DEPOSIT'):
+        amt = input("\n Enter the amount you would like to deposit: \n")
+        deposit(amt)
+    
+    if(splitcommand[0] == 'WHO'):
+        who()
