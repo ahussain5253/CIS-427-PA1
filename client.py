@@ -1,5 +1,7 @@
 import socket
+import threading
 
+alias = input('Choose a name: ')
 PORT = 5534
 
 sock = socket.socket()

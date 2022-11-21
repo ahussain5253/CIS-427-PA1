@@ -1,23 +1,23 @@
 import socket
+import threading
 import sqlite3
+
+PORT = 5534
 
 #Connect database
 conn = sqlite3.connect('cis427_crypto.sqlite')
 u = conn.cursor()
 
 #Creating Socket
-s = socket.socket()
+server = socket.socket()
 print('Socket succesfully created')
 
-#Creating Port
-port = 5534
-s.bind(('', port))
-print(f'socket binded to port{port}')
+server.bind(('', PORT))
+print(f'socket binded to port{PORT}')
 
 #Socket is awaiting response from client
-s.listen(5)
-print('Socket is listening')
-
+server.listen()
+           
 #Create users table
 u.execute("""CREATE TABLE IF NOT EXISTS Users
                         (  
@@ -296,7 +296,7 @@ def quit():
 
 
 while True: 
-    c, addr = s.accept()
+    c, addr = server.accept()
     print('Got connection from', addr)
 
     command = c.recv(1024).decode()
