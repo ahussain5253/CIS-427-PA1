@@ -410,10 +410,6 @@ while True:
         c.send("QUIT".encode())
         quitCom = 1
                  
-    c.send("STOP".encode())
-        
-    instance = 1
-
     if (splitcommand[0] == 'LOGIN'):
         uid = splitcommand[1]
         pswd = splitcommand[2]
@@ -433,4 +429,10 @@ while True:
         deposit(amt)
     
     if(splitcommand[0] == 'WHO'):
-        who()
+        uid = input("\n\nEnter user id\n\n")
+        who(uid)
+
+    
+    c.send("STOP".encode())
+        
+    instance = 1
